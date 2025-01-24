@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
+// User type definition
 type User = {
   firstName: string;
   lastName: string;
@@ -10,98 +11,103 @@ type User = {
   gender?: string;
   bio?: string;
   username?: string;
-};
-
-type FormData = {
-  bio: string;
-  profilePicture: File | null;
-  gender: string;
-  username: string;
+  nationality?: string;
 };
 
 const Profile = () => {
-  const params = useParams();
-  const clientId = params.id;
+  const { id: clientId } = useParams();
 
   const [user, setUser] = useState<User | null>(null);
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [bio, setBio] = useState<string>("");
-  const [profilePicture, setProfilePicture] = useState<File | null>(null);
-  const [gender, setGender] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
-  const [nationality, setNationality] = useState<string>("");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    bio: "",
+    profilePicture: null as File | null,
+    gender: "",
+    username: "",
+    nationality: "",
+  });
 
-  const formData: FormData = {
-    bio,
-    profilePicture,
-    gender,
-    username,
-  };
-
+  // Fetch user data on mount
   useEffect(() => {
-    if (clientId) fetchUser();
+    if (clientId) {
+      fetchUser();
+    }
   }, [clientId]);
 
+  // Fetch user details from API
   const fetchUser = async () => {
-    const res = await fetch("/api/auth/getUser", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ clientId }),
-    });
-    if (!res.ok) {
-      console.error("User not found");
-      return;
+    try {
+      const res = await fetch("/api/auth/getUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId }),
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch user");
+
+      const { user: fetchedUser } = await res.json();
+      setUser(fetchedUser);
+      setFormData({
+        firstName: fetchedUser.firstName || "",
+        lastName: fetchedUser.lastName || "",
+        email: fetchedUser.email || "",
+        bio: fetchedUser.bio || "",
+        profilePicture: null,
+        gender: fetchedUser.gender || "",
+        username: fetchedUser.username || "",
+        nationality: fetchedUser.nationality || "",
+      });
+    } catch (error) {
+      console.error(error instanceof Error);
     }
-
-    const userData = await res.json();
-
-    setUser(userData.user);
-    setFirstName(userData.user.firstName);
-    setLastName(userData.user.lastName);
-    setEmail(userData.user.email);
-    setBio(userData.user.bio);
-    setGender(userData.user.gender);
-    setUsername(userData.user.username);
-    setNationality(userData.user.nationality);
   };
 
+  // Update profile data in Firestore
   const updateProfile = async () => {
-    const res = await fetch(`/api/user/updateUser/${clientId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        clientId,
-        bio,
-        profilePicture,
-        gender,
-        username,
-        nationality,
-      }),
-    });
+    try {
+      const res = await fetch(`/api/user/updateUser/${clientId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, clientId }),
+      });
 
-    const data = await res.json();
-    if (data.success) {
+      const data = await res.json();
+      if (!data.success) throw new Error("Profile update failed");
+
       console.log("Profile updated successfully");
-    } else {
-      console.error("Profile update failed");
+    } catch (error) {
+      console.error(error instanceof Error);
     }
+  };
+
+  // Handle form input changes dynamically
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle file input change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData((prev) => ({ ...prev, profilePicture: file }));
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="flex max-w-4xl mx-auto bg-white shadow-lg rounded-lg">
+        {/* Profile Picture Section */}
         <div className="flex flex-col items-center p-6 w-1/3 border-r">
           <div className="relative">
             <img
               src={
-                profilePicture
-                  ? URL.createObjectURL(profilePicture)
+                formData.profilePicture
+                  ? URL.createObjectURL(formData.profilePicture)
                   : "/default-avatar.png"
               }
               alt="Profile"
@@ -114,17 +120,19 @@ const Profile = () => {
               id="profilePictureInput"
               type="file"
               className="hidden"
-              onChange={(e) => setProfilePicture(e.target.files?.[0] ?? null)}
+              onChange={handleFileChange}
             />
           </div>
           <h1 className="mt-4 text-xl font-bold text-gray-800">
-            {firstName} {lastName}
+            {formData.firstName} {formData.lastName}
           </h1>
-          <p className="text-sm text-gray-500">{email}</p>
+          <p className="text-sm text-gray-500">{formData.email}</p>
         </div>
 
+        {/* Form Section */}
         <div className="flex-1 p-6">
           <div className="grid grid-cols-1 gap-4">
+            {/* Username */}
             <div>
               <label
                 htmlFor="username"
@@ -137,11 +145,12 @@ const Profile = () => {
                 name="username"
                 type="text"
                 className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={formData.username}
+                onChange={handleInputChange}
               />
             </div>
 
+            {/* Nationality */}
             <div>
               <label
                 htmlFor="nationality"
@@ -154,8 +163,8 @@ const Profile = () => {
                 name="nationality"
                 type="text"
                 className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={nationality}
-                onChange={(e) => setNationality(e.target.value)}
+                value={formData.nationality}
+                onChange={handleInputChange}
                 list="nationalityOptions"
               />
               <datalist id="nationalityOptions">
@@ -166,6 +175,7 @@ const Profile = () => {
               </datalist>
             </div>
 
+            {/* Gender */}
             <div>
               <label
                 htmlFor="gender"
@@ -175,16 +185,19 @@ const Profile = () => {
               </label>
               <select
                 id="gender"
+                name="gender"
                 className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
+                value={formData.gender}
+                onChange={handleInputChange}
               >
+                <option value="">Select</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
               </select>
             </div>
 
+            {/* Bio */}
             <div>
               <label
                 htmlFor="bio"
@@ -196,12 +209,13 @@ const Profile = () => {
                 id="bio"
                 name="bio"
                 className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
+                value={formData.bio}
+                onChange={handleInputChange}
               />
             </div>
           </div>
 
+          {/* Submit Button */}
           <div className="mt-6 text-right">
             <button
               onClick={(e) => {
