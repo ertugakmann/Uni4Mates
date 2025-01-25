@@ -3,13 +3,7 @@
 import { useParams } from "next/navigation";
 import React, { useEffect, useState, Fragment } from "react";
 import DefaultAvatar from "../../../public/assets/profile/default-avatar.png";
-import {
-  Combobox,
-  ComboboxButton,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-} from "@headlessui/react";
+import { Combobox } from "@headlessui/react";
 import { ChevronDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 import country from "../../../countries.json";
 
@@ -35,11 +29,10 @@ const Profile = () => {
     profilePicture: null as File | null,
     gender: "",
     username: "",
-    nationality: { name: "" },
+    nationality: "",
   });
 
   const [query, setQuery] = useState("");
-  const [selectedCountry, setSelected] = useState(country[0]); // Ensure this defaults to a valid country
   const filteredCountry =
     query === ""
       ? country // Display all countries if query is empty
@@ -75,6 +68,7 @@ const Profile = () => {
         username: fetchedUser.username || "",
         nationality: fetchedUser.nationality || "",
       });
+      console.log(formData.nationality);
     } catch (error) {
       console.error(error instanceof Error);
     }
@@ -218,8 +212,8 @@ const Profile = () => {
                     <Combobox.Input
                       className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 bg-[whitesmoke] focus:ring-0"
                       displayValue={(country: { name: string }) =>
-                        country?.name || ""
-                      } // Display empty if no country is selected
+                        country?.name || formData.nationality
+                      } // Display user's nationality as default value
                       onChange={(event) => setQuery(event.target.value)}
                     />
                     <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
