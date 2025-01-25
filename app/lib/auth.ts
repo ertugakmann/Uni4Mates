@@ -1,7 +1,6 @@
 "use server";
 
 import { jwtVerify, SignJWT } from "jose";
-import { FormData } from "../types/UserData";
 import { cookies } from "next/headers";
 
 const secretKey = process.env.JWT_SECRET;
@@ -22,10 +21,10 @@ export async function decrypt(input: string): Promise<any> {
   return payload;
 }
 
-export async function login(formData: FormData) {
+export async function login(userId: string) {
   // Create the session
   const expires = new Date(Date.now() + 1000 * 1000);
-  const session = await encrypt({ formData, expires });
+  const session = await encrypt({ userId, expires });
 
   // Save the session in a cookie
   (await cookies()).set("session", session, { expires, httpOnly: true });

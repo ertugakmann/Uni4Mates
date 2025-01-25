@@ -2,18 +2,12 @@
 
 import React, { ReactHTMLElement } from "react";
 import { login } from "../lib/auth";
-import { FormData } from "../types/UserData";
 
 const Login = () => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
-  const formData: FormData = {
-    email,
-    password,
-  };
-
-  const handleLogin = async (formData: FormData) => {
+  const handleLogin = async () => {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -32,10 +26,9 @@ const Login = () => {
       console.log("Login successful:", data);
       alert("Login successful");
 
-      login(formData);
+      login(data.user.id);
 
       // Başarılı login sonrası yönlendirme
-      console.log(data);
       window.location.href = "/";
     } catch (error) {
       console.error("Error:", error);
@@ -118,7 +111,7 @@ const Login = () => {
               className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               onClick={async (e) => {
                 e.preventDefault();
-                await handleLogin(formData);
+                await handleLogin();
               }}
             >
               Sign in
