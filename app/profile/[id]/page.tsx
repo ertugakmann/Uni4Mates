@@ -35,7 +35,7 @@ const Profile = () => {
     profilePicture: null as File | null,
     gender: "",
     username: "",
-    nationality: "",
+    nationality: { name: "" },
   });
 
   const [query, setQuery] = useState("");
@@ -87,7 +87,7 @@ const Profile = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          nationality: formData.nationality?.name || formData.nationality, // Ensure only the country name is sent
+          nationality: formData.nationality.name, // Ensure only the country name is sent
           clientId,
         }),
       });
