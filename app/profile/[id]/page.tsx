@@ -6,6 +6,7 @@ import DefaultAvatar from "../../../public/assets/profile/default-avatar.png";
 import { Combobox } from "@headlessui/react";
 import { ChevronDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 import country from "../../../countries.json";
+import { getSession } from "@/app/lib/auth";
 
 type User = {
   firstName: string;
@@ -20,6 +21,7 @@ type User = {
 const Profile = () => {
   const { id: clientId } = useParams();
 
+  const [isPersonalPage, setIsPersonalPage] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -57,6 +59,15 @@ const Profile = () => {
       if (!res.ok) throw new Error("Failed to fetch user");
 
       const { user: fetchedUser } = await res.json();
+
+      const currentSession = await getSession();
+
+      if (currentSession.userId === clientId) {
+        setIsPersonalPage(true);
+      }
+
+      console.log(fetchedUser.id);
+
       setUser(fetchedUser);
       setFormData({
         firstName: fetchedUser.firstName || "",
@@ -68,7 +79,6 @@ const Profile = () => {
         username: fetchedUser.username || "",
         nationality: fetchedUser.nationality || "",
       });
-      console.log(formData.nationality);
     } catch (error) {
       console.error(error instanceof Error);
     }
@@ -169,11 +179,15 @@ const Profile = () => {
           <h1 className="mt-4 text-xl font-bold text-gray-800">
             {formData.firstName} {formData.lastName}
           </h1>
-          <p className="text-sm text-gray-500">{formData.email}</p>
+
+          {isPersonalPage && (
+            <p className="text-sm text-gray-500">{formData.email}</p>
+          )}
         </div>
 
         <div className="flex-1 p-6">
           <div className="grid grid-cols-1 gap-4">
+            {/* Username */}
             <div>
               <label
                 htmlFor="username"
@@ -188,9 +202,11 @@ const Profile = () => {
                 className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 value={formData.username}
                 onChange={handleInputChange}
+                disabled={!isPersonalPage}
               />
             </div>
 
+            {/* Nationality */}
             <div>
               <label
                 htmlFor="nationality"
@@ -206,6 +222,7 @@ const Profile = () => {
                   }
                   setQuery(""); // Clear the query when a nationality is selected
                 }}
+                disabled={!isPersonalPage}
               >
                 <div className="relative mt-1 z-10">
                   <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
@@ -267,6 +284,7 @@ const Profile = () => {
               </Combobox>
             </div>
 
+            {/* Gender */}
             <div>
               <label
                 htmlFor="gender"
@@ -280,6 +298,7 @@ const Profile = () => {
                 className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 value={formData.gender}
                 onChange={handleInputChange}
+                disabled={!isPersonalPage}
               >
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
@@ -288,6 +307,7 @@ const Profile = () => {
               </select>
             </div>
 
+            {/* Bio */}
             <div>
               <label
                 htmlFor="bio"
@@ -301,17 +321,20 @@ const Profile = () => {
                 className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 value={formData.bio}
                 onChange={handleInputChange}
+                disabled={!isPersonalPage}
               />
             </div>
 
             <div>
-              <button
-                type="button"
-                onClick={updateProfile}
-                className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-white shadow-sm hover:bg-indigo-700"
-              >
-                Update Profile
-              </button>
+              {isPersonalPage && (
+                <button
+                  type="button"
+                  onClick={updateProfile}
+                  className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-white shadow-sm hover:bg-indigo-700"
+                >
+                  Update Profile
+                </button>
+              )}
             </div>
           </div>
         </div>
