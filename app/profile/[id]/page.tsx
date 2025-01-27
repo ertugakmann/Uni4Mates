@@ -16,6 +16,7 @@ type User = {
   bio?: string;
   username?: string;
   nationality?: string;
+  instagram?: string;
 };
 
 const Profile = () => {
@@ -32,6 +33,7 @@ const Profile = () => {
     gender: "",
     username: "",
     nationality: "",
+    instagram: "",
   });
 
   const [query, setQuery] = useState("");
@@ -66,9 +68,8 @@ const Profile = () => {
         setIsPersonalPage(true);
       }
 
-      console.log(fetchedUser.id);
-
       setUser(fetchedUser);
+
       setFormData({
         firstName: fetchedUser.firstName || "",
         lastName: fetchedUser.lastName || "",
@@ -78,6 +79,7 @@ const Profile = () => {
         gender: fetchedUser.gender || "",
         username: fetchedUser.username || "",
         nationality: fetchedUser.nationality || "",
+        instagram: fetchedUser.instagram || "",
       });
     } catch (error) {
       console.error(error instanceof Error);
@@ -320,6 +322,25 @@ const Profile = () => {
                 name="bio"
                 className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 value={formData.bio}
+                onChange={handleInputChange}
+                disabled={!isPersonalPage}
+              />
+            </div>
+
+            {/* Instagram */}
+            <div>
+              <label
+                htmlFor="instagram"
+                className="block text-sm font-medium text-gray-900"
+              >
+                Instagram
+              </label>
+              <input
+                id="instagram"
+                name="instagram"
+                type="text"
+                className="mt-1 block w-full rounded-md border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                value={formData.instagram}
                 onChange={handleInputChange}
                 disabled={!isPersonalPage}
               />

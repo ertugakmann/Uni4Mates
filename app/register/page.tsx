@@ -13,6 +13,7 @@ const Login = () => {
   const [gender, setGender] = useState("null");
   const [nationality, setNationality] = useState("null");
   const [bio, setBio] = useState("null");
+  const [instagram, setInstagram] = useState("null");
 
   const [user, setUser] = useState({
     firstName: "",
@@ -31,6 +32,7 @@ const Login = () => {
     gender,
     nationality,
     bio,
+    instagram,
   };
 
   // Sign Up Function

@@ -3,8 +3,15 @@ import dbConnect from "@/app/lib/dbConnect";
 import User from "@/app/models/User";
 
 export async function PUT(req: NextRequest) {
-  const { bio, profilePicture, gender, clientId, nationality, username } =
-    await req.json();
+  const {
+    bio,
+    profilePicture,
+    gender,
+    clientId,
+    nationality,
+    username,
+    instagram,
+  } = await req.json();
 
   try {
     await dbConnect();
@@ -20,6 +27,7 @@ export async function PUT(req: NextRequest) {
     if (bio) user.bio = bio;
     if (nationality) user.nationality = nationality;
     if (username) user.username = username;
+    if (instagram) user.instagram = instagram;
 
     // Değişiklikleri kaydediyoruz
     await user.save();

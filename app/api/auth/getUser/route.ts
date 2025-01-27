@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
         nationality: user.nationality,
         bio: user.bio,
         gender: user.gender,
+        instagram: user.instagram,
       },
     },
     { status: 200 }

@@ -13,6 +13,7 @@ export async function POST(req: Request) {
     gender,
     nationality,
     bio,
+    instagram,
   } = await req.json();
 
   try {
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
       gender,
       nationality,
       bio,
+      instagram,
     });
 
     return NextResponse.json({ message: "User created", user: newUser });
