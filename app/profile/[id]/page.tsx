@@ -102,6 +102,7 @@ const Profile = () => {
       if (!data.success) throw new Error("Profile update failed");
 
       console.log("Profile updated successfully");
+      // Redirect to the updated profile page
     } catch (error) {
       console.error(error instanceof Error);
     }
