@@ -107,6 +107,19 @@ const Profile = () => {
     }
   };
 
+  async function uploadImage(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    return data.url;
+  }
+
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -116,41 +129,11 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const uploadProfilePicture = async (file: File) => {
-    try {
-      const formData = new FormData();
-      formData.append("profilePicture", file);
-      formData.append(
-        "clientId",
-        Array.isArray(clientId) ? clientId[0] : clientId || ""
-      );
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        setFormData((prev) => ({
-          ...prev,
-          profilePicture: data.fileUrl,
-        }));
-        console.log("Profile picture uploaded successfully");
-      } else {
-        throw new Error("Upload failed");
-      }
-    } catch (error) {
-      console.error(
-        error instanceof Error ? error.message : "Error uploading file"
-      );
-    }
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     if (selectedFile) {
-      uploadProfilePicture(selectedFile);
+      setFormData((prev) => ({ ...prev, profilePicture: selectedFile }));
+      uploadImage(selectedFile);
     }
   };
 
@@ -161,8 +144,8 @@ const Profile = () => {
           <div className="relative">
             <img
               src={
-                typeof formData.profilePicture === "string"
-                  ? formData.profilePicture
+                formData.profilePicture
+                  ? URL.createObjectURL(formData.profilePicture)
                   : DefaultAvatar.src
               }
               alt="Profile"
